@@ -1,0 +1,32 @@
+FROM node as build
+
+WORKDIR /app
+
+COPY package*.json .
+
+RUN npm install
+
+COPY . .
+
+RUN ls -la public/env-config.js
+
+RUN npm run build
+
+FROM nginx
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+#COPY --from=build /app/public/env-config.js /usr/share/nginx/html
+
+COPY entrypoint.sh /entrypoint.sh
+
+# Rend le script exécutable
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["nginx", "-g", "daemon off;"]
+
+
+

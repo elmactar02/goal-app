@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: persist-vol
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: standard
+  hostPath:
+    path: /tmp
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+  volumeName: persist-vol
+  accessModes:
+    - ReadWriteMany
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  type: LoadBalancer
+  selector:
+    app: backend
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-1
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: back-first
+        image: mactargueye2003/back_first
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        envFrom:
+        - secretRef:
+            name: mysecret
+      volumes:
+        - name: persist-vol
+          persistentVolumeClaim:
+            claimName: mypvc
