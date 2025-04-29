@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: maps
 data:
-  BACK_DNS: "http://127.0.0.1:52982"
+  BACK_DNS: "http://127.0.0.1:82"
 
 ---
 apiVersion: v1
@@ -11,7 +11,7 @@ kind: Service
 metadata:
   name: front
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: frontend
   ports:
