@@ -12,9 +12,9 @@ pipeline {
     }
 
     stage('Build & Deploy Frontend') {
-      when {
-        expression { changedFiles.any { it.startsWith("frontend/") } }
-      }
+      //when {
+        //expression { changedFiles.any { it.startsWith("frontend/") } }
+      //}
       steps {
         withCredentials([usernamePassword(credentialsId: '4415de94-57cd-46fc-b59f-1430a7e813cb', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
          bat '''
@@ -22,6 +22,8 @@ pipeline {
           docker build -t mactargueye2003/front_first -f frontend/Dockerfile.prod frontend/
           docker push mactargueye2003/front_first
           set KUBECONFIG=C:\\Users\\macta\\.kube\\config
+          kubectl config get-contexts
+          kubectl get pods -A
           kubectl delete -f kubernetes/frontend.yaml
           kubectl apply -f kubernetes/frontend.yaml
           kubectl rollout restart deployment/proxy
