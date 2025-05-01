@@ -46,11 +46,15 @@ pipeline {
         expression { changedFiles.any { it.startsWith("proxy/") } }
       }
       steps {
+         withCredentials([usernamePassword(credentialsId: '4415de94-57cd-46fc-b59f-1430a7e813cb', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
         bat '''
+        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
         docker build -t mactargueye2003/proxy proxy/
         docker push mactargueye2003/proxy
+        set KUBECONFIG=C:\\Users\\macta\\.kube\\config
         kubectl apply -f kubernetes/proxy.yaml
         '''
+         }
       }
     }
 
