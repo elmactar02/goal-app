@@ -23,6 +23,7 @@ pipeline {
           docker push mactargueye2003/front_first
           set KUBECONFIG=C:\\Users\\macta\\.kube\\config
           kubectl apply -f kubernetes/frontend.yaml
+          kubectl rollout restart deployment kubernetes/proxy.yaml
         ''' 
       }
       }
