@@ -22,8 +22,7 @@ pipeline {
           docker build -t mactargueye2003/front_first -f frontend/Dockerfile.prod frontend/
           docker push mactargueye2003/front_first
           set KUBECONFIG=C:\\Users\\macta\\.kube\\config
-          kubectl config get-contexts
-          kubectl get pods -A
+          dir frontend
           kubectl delete -f kubernetes/frontend.yaml
           kubectl apply -f kubernetes/frontend.yaml
           kubectl rollout restart deployment/proxy
