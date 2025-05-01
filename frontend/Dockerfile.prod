@@ -19,8 +19,8 @@ COPY --from=build /app/build /usr/share/nginx/html
 #COPY --from=build /app/public/env-config.js /usr/share/nginx/html
 
 COPY entrypoint.sh /entrypoint.sh
-RUN ls -l /entrypoint.sh
-RUN file /entrypoint.sh
+RUN ls -l /
+
 # Rend le script exécutable
 RUN chmod +x /entrypoint.sh
 
