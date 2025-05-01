@@ -21,7 +21,7 @@ pipeline {
           echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
           docker build -t mactargueye2003/front_first -f frontend/Dockerfile.prod frontend/
           docker push mactargueye2003/front_first
-          set KUBECONFIG=C:\Users\macta\.kube\config
+          set KUBECONFIG=C:\\Users\\macta\\.kube\\config
           kubectl apply -f kubernetes/frontend.yaml
         ''' 
       }
