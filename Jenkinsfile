@@ -6,7 +6,7 @@ pipeline {
     stage('Checkout') {
       steps {
         script {
-          changedFiles = sh(script: "git diff --name-only HEAD~1", returnStdout: true).trim().split("\n")
+          changedFiles = bat(script: "git diff --name-only HEAD~1", returnStdout: true).trim().split("\n")
         }
       }
     }
@@ -16,7 +16,7 @@ pipeline {
         expression { changedFiles.any { it.startsWith("frontend/") } }
       }
       steps {
-        sh '''
+        bat '''
         docker build -t mactargueye2003/front_first -f frontend/Dockerfile.prod frontend/
         docker push mactargueye2003/front_first
         kubectl apply -f kubernetes/frontend.yaml
@@ -29,7 +29,7 @@ pipeline {
         expression { changedFiles.any { it.startsWith("backend/") } }
       }
       steps {
-        sh '''
+        bat '''
         docker build -t mactargueye2003/back_first backend/
         docker push mactargueye2003/back_first
         kubectl apply -f kubernetes/backend.yaml
@@ -42,7 +42,7 @@ pipeline {
         expression { changedFiles.any { it.startsWith("proxy/") } }
       }
       steps {
-        sh '''
+        bat '''
         docker build -t mactargueye2003/proxy proxy/
         docker push mactargueye2003/proxy
         kubectl apply -f kubernetes/proxy.yaml
@@ -60,7 +60,7 @@ pipeline {
     script {
       def yamlFiles = changedFiles.findAll { it.endsWith(".yaml") || it.endsWith(".yml") }
       yamlFiles.each { file ->
-        sh "kubectl apply -f ${file}"
+        bat "kubectl apply -f ${file}"
       }
     }
   }
