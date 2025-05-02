@@ -12,9 +12,9 @@ pipeline {
     }
 
     stage('Build & Deploy Frontend') {
-      //when {
+      when {
         //expression { changedFiles.any { it.startsWith("frontend/") } }
-      //}
+      }
       steps {
         withCredentials([usernamePassword(credentialsId: '4415de94-57cd-46fc-b59f-1430a7e813cb', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
          bat '''
@@ -22,9 +22,7 @@ pipeline {
           docker build -t mactargueye2003/front_first -f frontend/Dockerfile.prod frontend/
           docker push mactargueye2003/front_first
           set KUBECONFIG=C:\\Users\\macta\\.kube\\config
-          sed -i "s|image: mactargueye2003/front_first:.*|image: mactargueye2003/front_first:${BUILD_NUMBER}|" kubernetes/frontend.yaml
-          kubectl apply -f kubernetes/frontend.yaml
-          kubectl rollout restart deployment/proxy
+          kubectl rollout restart deployment/frontend-1
         ''' 
       }
       }
@@ -35,11 +33,15 @@ pipeline {
         expression { changedFiles.any { it.startsWith("backend/") } }
       }
       steps {
+        withCredentials([usernamePassword(credentialsId: '4415de94-57cd-46fc-b59f-1430a7e813cb', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
         bat '''
+        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
         docker build -t mactargueye2003/back_first backend/
         docker push mactargueye2003/back_first
-        kubectl apply -f kubernetes/backend.yaml
+        set KUBECONFIG=C:\\Users\\macta\\.kube\\config
+        kubectl rollout restart deployment/backend-1
         '''
+        }
       }
     }
 
@@ -55,6 +57,7 @@ pipeline {
         docker push mactargueye2003/proxy
         set KUBECONFIG=C:\\Users\\macta\\.kube\\config
         kubectl apply -f kubernetes/proxy.yaml
+        kubectl rollout restart deployment/proxy
         '''
          }
       }
