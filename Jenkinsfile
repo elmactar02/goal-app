@@ -22,8 +22,7 @@ pipeline {
           docker build -t mactargueye2003/front_first -f frontend/Dockerfile.prod frontend/
           docker push mactargueye2003/front_first
           set KUBECONFIG=C:\\Users\\macta\\.kube\\config
-          dir frontend
-          kubectl delete -f kubernetes/frontend.yaml
+          sed -i "s|image: mactargueye2003/front_first:.*|image: mactargueye2003/front_first:${BUILD_NUMBER}|" kubernetes/frontend.yaml
           kubectl apply -f kubernetes/frontend.yaml
           kubectl rollout restart deployment/proxy
         ''' 

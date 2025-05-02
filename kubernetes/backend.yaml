@@ -57,7 +57,7 @@ spec:
     spec:
       containers:
       - name: back-first
-        image: mactargueye2003/back_first
+        image: mactargueye2003/back_first:latest
         resources:
           limits:
             memory: "128Mi"

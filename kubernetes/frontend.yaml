@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: front-conteneur
-        image: mactargueye2003/front_first
+        image: mactargueye2003/front_first:latest
         imagePullPolicy: Always
         resources:
           limits:
