@@ -73,7 +73,10 @@ pipeline {
     script {
       def yamlFiles = changedFiles.findAll { it.endsWith(".yaml") || it.endsWith(".yml") }
       yamlFiles.each { file ->
-        bat "kubectl apply -f ${file}"
+        bat '''
+        set KUBECONFIG=C:\\Users\\macta\\.kube\\config
+        kubectl apply -f ${file}
+        '''
       }
     }
   }
