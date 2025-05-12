@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const express = require('express');
+const client2 = require('prom-client');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const redis = require('redis');
@@ -9,6 +10,25 @@ const redis = require('redis');
 const Goal = require('./models/goal');
 
 const app = express();
+
+// 1. Créer un registre et des métriques
+const register = new client2.Registry();
+const httpRequestCounter = new client2.Counter({
+  name: 'http_requests_total',
+  help: 'Nombre total de requêtes HTTP',
+  labelNames: ['method', 'route', 'status']
+});
+
+register.registerMetric(httpRequestCounter);
+
+const httpRequestDuration = new client2.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Durée des requêtes HTTP en secondes',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.1, 0.3, 0.5, 1, 1.5, 2, 5] // secondes
+});
+register.registerMetric(httpRequestDuration);
+client2.collectDefaultMetrics({ register }); // RAM, CPU, etc.
 
 // Configuration Redis
 const client = redis.createClient({
@@ -25,6 +45,21 @@ async function connectRedis() {
   await client.connect();
 }
 connectRedis();
+
+// 2. Middleware pour incrémenter le nombre de requete pour certains labels
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    httpRequestCounter.labels(req.method, req.path, res.statusCode).inc();
+  });
+  next();
+});
+app.use((req, res, next) => {
+  const end = httpRequestDuration.startTimer(); // démarre un chronomètre
+  res.on('finish', () => {
+    end({ method: req.method, route: req.path, status: res.statusCode });
+  });
+  next();
+});
 
 app.use(bodyParser.json());
 
@@ -64,6 +99,12 @@ app.get('/goals', async (req, res) => {
     console.error(err.message);
     res.status(500).json({ message: 'Failed to load goals.' });
   }
+});
+
+// 3. Endpoint /metrics
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 // POST /goals
