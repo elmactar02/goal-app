@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-api-servicemonitor
+  labels:
+    release: prometheus  # important, voir ci-dessous
+spec:
+  selector:
+    matchLabels:
+      name: myservice          # doit matcher ton service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+  namespaceSelector:
+    matchNames:
+      - default            # namespace où tourne ton service
