@@ -8,6 +8,8 @@ RUN npm install
 
 RUN npm install redis
 
+RUN npm install prom-client
+
 COPY . .
 
 EXPOSE 80
